@@ -3,9 +3,9 @@ package main
 //test change
 
 import (
-	// "fmt"
-	// "image"
-	// "image/png"
+	"fmt"
+	"image"
+	"image/png"
 	"math"
 	"os"
 
@@ -77,6 +77,64 @@ func (net Network) Predict(inputData []float64) mat.Matrix {
 	return finalOutputs
 }
 
+// Gets data from the PNG file
+func dataFromImage(filePath string) (pixels []float64) {
+	//read the file
+	imgFile, err := os.Open(filePath)
+	defer imgFile.Close()
+	
+	if err != nil {
+		fmt.Println("Cannot read file:", err)
+	}
+	
+	img, err := png.Decode(imgFile)
+	
+	if err != nil {
+		fmt.Println("Cannot decode file:", err)
+	}
+
+	// create a greyscale image
+	bounds := img.Bounds()
+	gray := image.NewGray(bounds)
+
+	for x := 0; x < bounds.Max.X; x++ {
+		for y := 0; y < bounds.Max.Y; y++ {
+			var rgba = img.At(x, y)
+			gray.Set(x, y, rgba)
+		}
+	}
+
+	// make a pixel array
+	pixels = make([]float64, len(gray.Pix))
+	// populating the pixel array and subtracting Pix from 255 because
+	// MINST database was trained (in reverse?)
+	//MINST is white on black so we need to subtract each pixel value from 255
+	for i := 0; i < len(gray.Pix); i++ {
+		pixels[i] = (float64(255-gray.Pix[i]) / 255.0 * 0.999) + 0.001
+	}
+	return
+}
+
+
+// takes in neural network and predicts the digit from an image file
+// results are an array of probabilities where the index is the digit
+func predictFromImage(net Network, path string) int {
+	input := dataFromImage(path)
+	output := net.Predict(input)
+	matrixPrint(output)
+	best := 0
+	highest := 0.0
+	for i := 0; i < net.outputs; i++ {
+		if output.At(i, 0) > highest {
+			best = i
+			highest = output.At(i, 0)
+		}
+	}
+	return best
+}
+
+
+
 // Sigmoid Prime function
 func sigmoidPrime(m mat.Matrix) mat.Matrix {
 	rows, _ := m.Dims()
@@ -99,6 +157,13 @@ func sigmoid(r, c int, z float64) float64 {
 
 
 // Helper functions 
+
+// pretty print a Gonum matrix
+func matrixPrint(X mat.Matrix) {
+	fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
+	fmt.Printf("%v\n", fa)
+}
+
 
 // Save hidden and output weights
 func save(net Network) {

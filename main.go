@@ -26,8 +26,10 @@ func main() {
 	net := CreateNetwork(784, 200, 10, 0.1)
 
 	mnist:= flag.String("mnist", "", "Either train or predict to evaluate neural network")
+	file := flag.String("file", "", "File name of 28 x 28 PNG file to evaluate")
 	flag.Parse()
 
+	// train or mass predict
 	switch *mnist {
 	case "train":
 		mnistTrain(&net)
@@ -37,6 +39,16 @@ func main() {
 		mnistPredict(&net)
 	default:
 		// pass
+	}
+
+	// predict individual image
+	if *file != "" {
+		//print the image out nicely on terminal
+		printImage(getImage(*file))
+		//load the neural network from file
+		load(&net)
+		//predict which number it is
+		fmt.Println("prediction:", predictFromImage(net, *file))
 	}
 
 
@@ -59,16 +71,16 @@ func mnistTrain(net *Network) {
 			inputs := make([]float64, net.inputs)
 			for i := range inputs {
 				x, _ := strconv.ParseFloat(record[i], 64)
-				inputs[i] = (x / 255.0 * 0.99) + 0.01
+				inputs[i] = (x / 255.0 * 0.999) + 0.001
 			}
 
 			targets := make([]float64, 10)
 			for i := range targets {
-				targets[i] = 0.01
+				targets[i] = 0.001
 			}
 
 			x, _ := strconv.Atoi(record[0])
-			targets[x] = 0.99
+			targets[x] = 0.999
 
 			net.Train(inputs, targets)
 		}
@@ -98,7 +110,7 @@ func mnistPredict(net *Network) {
 				inputs[i] = 1.0
 			}
 			x, _ := strconv.ParseFloat(record[i], 64)
-			inputs[i] = (x / 255.0 * 0.99) + 0.01
+			inputs[i] = (x / 255.0 * 0.999) + 0.001
 		}
 
 		outputs := net.Predict(inputs)
@@ -132,7 +144,7 @@ func printImage(img image.Image) {
 
 // get the file as an image
 func getImage(filePath string) image.Image {
-	imgFile, err :=os.Open(filePath)
+	imgFile, err := os.Open(filePath)
 	defer imgFile.Close()
 	if err != nil {
 		fmt.Println("Cannot read file:", err)
