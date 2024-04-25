@@ -25,7 +25,7 @@ func main() {
 
 	net := CreateNetwork(784, 200, 10, 0.1)
 
-	mnist:= flat.String("mnist", "", "Either train or predict to evaluate neural network")
+	mnist:= flag.String("mnist", "", "Either train or predict to evaluate neural network")
 	flag.Parse()
 
 	switch *mnist {
@@ -43,12 +43,12 @@ func main() {
 }
 
 func mnistTrain(net *Network) {
-	rand.Seed(time.Now().UTC.UnixNano())
+	rand.Seed(time.Now().UTC().UnixNano())
 	t1 := time.Now()
 
 	for epochs := 0; epochs < 5; epochs++ {
 		testFile, _ := os.Open("mnist_dataset/mnist_train.csv")
-		r := csv.newReader(bufio.NewReader(testFile))
+		r := csv.NewReader(bufio.NewReader(testFile))
 
 		for {
 			record, err := r.Read()
@@ -92,12 +92,12 @@ func mnistPredict(net *Network) {
 		if err == io.EOF {
 			break
 		}
-		inputs := make([float64, net.inputs])
+		inputs := make([]float64, net.inputs)
 		for i := range inputs {
 			if i == 0 {
 				inputs[i] = 1.0
 			}
-			x, _ :=str.conv.ParseFloat(record[i], 64)
+			x, _ := strconv.ParseFloat(record[i], 64)
 			inputs[i] = (x / 255.0 * 0.99) + 0.01
 		}
 
@@ -133,7 +133,7 @@ func printImage(img image.Image) {
 // get the file as an image
 func getImage(filePath string) image.Image {
 	imgFile, err :=os.Open(filePath)
-	defer imgFile.close()
+	defer imgFile.Close()
 	if err != nil {
 		fmt.Println("Cannot read file:", err)
 	}

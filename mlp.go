@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"image"
-	"image/png"
+	// "fmt"
+	// "image"
+	// "image/png"
 	"math"
 	"os"
 
@@ -32,8 +32,8 @@ func CreateNetwork(input, hidden, output int, rate float64) (net Network) {
 		learningRate: rate,
 	}
 
-	net.hiddenWeights = mat.Dense(net.hiddens, net.inputs, randomArray(net.inputs*net.hiddens, float64(net.inputs)))
-	net.outputWeights = mat.Dense(net.outputs, net.hiddens, randomArray(net.hiddens*net.outputs, float64(net.hiddens)))
+	net.hiddenWeights = mat.NewDense(net.hiddens, net.inputs, randomArray(net.inputs*net.hiddens, float64(net.inputs)))
+	net.outputWeights = mat.NewDense(net.outputs, net.hiddens, randomArray(net.hiddens*net.outputs, float64(net.hiddens)))
 	return
 
 }
@@ -78,7 +78,7 @@ func (net Network) Predict(inputData []float64) mat.Matrix {
 // Sigmoid Prime function
 func sigmoidPrime(m mat.Matrix) mat.Matrix {
 	rows, _ := m.Dims()
-	o := make([float64, rows])
+	o := make([]float64, rows)
 	for i := range o {
 		o[i] = 1
 	}
@@ -133,12 +133,12 @@ func load(net *Network) {
 // Create random array using a Uniform distribution of float64 nums
 func randomArray(size int, v float64) (data []float64) {
 	dist :=distuv.Uniform{
-		Min: -1 / mat.Sqrt(v),
+		Min: -1 / math.Sqrt(v),
 		Max : 1 /math.Sqrt(v),
 	}
 
 	data = make([]float64, size)
-	for i := 0, i < size; i++ {
+	for i := 0; i < size; i++ {
 		data[i] = dist.Rand()
 	}
 	return
@@ -174,7 +174,7 @@ func scale(s float64, m mat.Matrix) mat.Matrix {
 func multiply(m, n mat.Matrix) mat.Matrix {
 	r, c := m.Dims()
 	o := mat.NewDense(r, c, nil)
-	o.MulElm(m, n)
+	o.MulElem(m, n)
 	return o
 }
 
@@ -197,7 +197,7 @@ func subtract(m, n mat.Matrix) mat.Matrix {
 // add a scalar value to each element in matrix
 func addScalar(i float64, m mat.Matrix) mat.Matrix {
 	r, c := m.Dims()
-	a := make([float64, r*c])
+	a := make([]float64, r*c)
 	for x := 0; x < r*c; x++ {
 		a[x] = i 
 	}
