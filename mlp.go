@@ -199,7 +199,7 @@ func load(net *Network) {
 
 // Create random array using a Uniform distribution of float64 nums
 func randomArray(size int, v float64) (data []float64) {
-	dist :=distuv.Uniform{
+	dist := distuv.Uniform{
 		Min: -1 / math.Sqrt(v),
 		Max : 1 /math.Sqrt(v),
 	}
@@ -213,7 +213,7 @@ func randomArray(size int, v float64) (data []float64) {
 
 // Finds the size of matrix, creates it and preforms the operation
 func dot(m, n mat.Matrix) mat.Matrix {
-	r, _ :=m.Dims() // Short variable declaration operator
+	r, _ := m.Dims() // Short variable declaration operator
 	_, c := n.Dims()
 	o := mat.NewDense(r, c, nil)
 	o.Product(m, n)

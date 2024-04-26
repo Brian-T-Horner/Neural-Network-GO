@@ -2,13 +2,13 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/base64"
+	// "bytes"
+	// "encoding/base64"
 	"encoding/csv"
 	"flag"
 	"fmt"
 	"image"
-	"image/png"
+	// "image/png"
 	"io"
 	"math/rand"
 	"os"
@@ -131,14 +131,28 @@ func mnistPredict(net *Network) {
 	elapsed :=time.Since(t1)
 	fmt.Printf("Time taken to check: %s\n", elapsed)
 	fmt.Println("score:", score)
+	// fmt.Println("Total outputs", len(outputs))
 }
 
 // print out images on ITerm2; equivalent to imgcat on iTerm2????
 func printImage(img image.Image) {
-	var buf bytes.Buffer
-	png.Encode(&buf, img)
-	imgBase64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-	fmt.Printf("\x1b]1337;File=inline=1:%s\a\n", imgBase64Str)
+	bounds := img.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			gray := (r*299 + g*587 + b*114 + 500) / 1000
+			if gray > 0x8000 {
+				fmt.Print(" ")
+			} else {
+				fmt.Print("█")
+			}
+		}
+		fmt.Println()
+	}
+	// var buf bytes.Buffer
+	// png.Encode(&buf, img)
+	// imgBase64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+	// fmt.Printf("\x1b]1337;File=inline=1:%s\a\n", imgBase64Str)
 }
 
 
